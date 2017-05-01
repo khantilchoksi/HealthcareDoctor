@@ -1,7 +1,6 @@
 package com.khantilchoksi.arztdoctor.ArztAsyncCalls;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -26,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 
@@ -33,35 +33,20 @@ import java.util.Map;
  * Created by Khantil on 22-03-2017.
  */
 
-public class GetPatientProfileTask extends AsyncTask<Void, Void, Boolean> {
+public class SaveDoctorQualificationTask extends AsyncTask<Void, Void, Boolean> {
 
-    private static final String LOG_TAG = GetPatientProfileTask.class.getSimpleName();
+    private static final String LOG_TAG = SaveDoctorQualificationTask.class.getSimpleName();
     Context context;
     Activity activity;
-    String fullName;
-    int gender;
-    int bloodGroup;
-    String birthdate;
-    String emergencyMobileNumber;
-    String latitude;
-    String longitude;
-    String fullAddress;
-    String pincode;
-    ProgressDialog progressDialog;
+    List<String> qualificationList;
 
-    public interface AsyncResponse {
-        void processFinish(String fullName, int gender, int bloodGroup, String birthdate,
-                           String emergencyMobileNumber,
-                           String latitude, String longitude, String fullAddress, String pincode, ProgressDialog progressDialog);
-    }
-
-    public AsyncResponse delegate = null;
-
-    public GetPatientProfileTask(Context context, Activity activity, AsyncResponse delegate, ProgressDialog progressDialog){
+    public SaveDoctorQualificationTask(Context context, Activity activity, List<String> qualificationList){
         this.context = context;
         this.activity = activity;
-        this.delegate = delegate;
-        this.progressDialog = progressDialog;
+        this.qualificationList = qualificationList;
+
+
+
     }
 
     @Override
@@ -73,7 +58,7 @@ public class GetPatientProfileTask extends AsyncTask<Void, Void, Boolean> {
 
         try {
 
-            final String CLIENT_BASE_URL = context.getResources().getString(R.string.base_url).concat("getPatientProfileDetails");
+            final String CLIENT_BASE_URL = context.getResources().getString(R.string.base_url).concat("setDoctorQualifications");
             URL url = new URL(CLIENT_BASE_URL);
 
 
@@ -87,7 +72,8 @@ public class GetPatientProfileTask extends AsyncTask<Void, Void, Boolean> {
 
             Uri.Builder builder = new Uri.Builder();
             Map<String, String> parameters = new HashMap<>();
-            parameters.put("pid", String.valueOf(Utility.getDoctorId(context)));
+            parameters.put("did", String.valueOf(Utility.getDoctorId(context)));
+
 
             // encode parameters
             Iterator entries = parameters.entrySet().iterator();
@@ -95,6 +81,10 @@ public class GetPatientProfileTask extends AsyncTask<Void, Void, Boolean> {
                 Map.Entry entry = (Map.Entry) entries.next();
                 builder.appendQueryParameter(entry.getKey().toString(), entry.getValue().toString());
                 entries.remove();
+            }
+
+            for(String qualification: qualificationList){
+                builder.appendQueryParameter("qualification[]", qualification);
             }
             String requestBody = builder.build().getEncodedQuery();
             Log.d(LOG_TAG, "Service Call URL : " + CLIENT_BASE_URL);
@@ -147,7 +137,7 @@ public class GetPatientProfileTask extends AsyncTask<Void, Void, Boolean> {
 
             clientCredStr = buffer.toString();
 
-            Log.d(LOG_TAG, "Patient Profile Credential JSON String : " + clientCredStr);
+            Log.d(LOG_TAG, "Client Credential JSON String : " + clientCredStr);
 
 
             return isSuccessfullyUpdate(clientCredStr);
@@ -178,7 +168,7 @@ public class GetPatientProfileTask extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected void onCancelled() {
-        progressDialog.dismiss();
+
     }
 
     @Override
@@ -186,12 +176,9 @@ public class GetPatientProfileTask extends AsyncTask<Void, Void, Boolean> {
         Log.d(LOG_TAG, "Success Boolean Tag: " + success.toString());
         if (success) {
 
-            delegate.processFinish(fullName,gender,bloodGroup,birthdate,emergencyMobileNumber,latitude,longitude,
-                    fullAddress,pincode,progressDialog);
+            successfullyUpdated();
 
         } else {
-
-            progressDialog.dismiss();
 
 
                 /*Snackbar.make(, R.string.error_unknown_error,
@@ -204,32 +191,27 @@ public class GetPatientProfileTask extends AsyncTask<Void, Void, Boolean> {
 
     private boolean isSuccessfullyUpdate(String clientCredStr) throws JSONException {
 
-        final String fullNameString = "fullName";
-        final String genderString = "gender";
-        final String bloodGroupString = "bloodGroup";
-        final String birthdateString = "birthdate";
-        final String emergencyMobilbeNumberString = "emergencyMobileNumber";
-        final String latitudeString = "latitude";
-        final String longitudeString = "longitude";
-        final String fullAddressString = "fullAddress";
-        final String pincodeString = "pincode";
+        final String successfullyUpdatedString = "successfullyUpdated";
 
 
         JSONObject clientJson = new JSONObject(clientCredStr);
-        fullName = clientJson.getString(fullNameString);
-        gender = Integer.valueOf(clientJson.getString(genderString));
-        bloodGroup = Integer.valueOf(clientJson.getString(bloodGroupString));
-        birthdate =clientJson.getString(birthdateString);
-        emergencyMobileNumber = clientJson.getString(emergencyMobilbeNumberString);
-        latitude = clientJson.getString(latitudeString);
-        longitude = clientJson.getString(longitudeString);
-        fullAddress = clientJson.getString(fullAddressString);
-        pincode = clientJson.getString(pincodeString);
+        String isSuccessfullyUpdated = clientJson.getString(successfullyUpdatedString);
+        if (isSuccessfullyUpdated.contains("true")) {
+            //Profile details successfully created
 
+            return true;
+        } else {
+            //Profile details not created successfully
 
+        }
 
-        return true;
+        return false;
     }
 
-
+    public void successfullyUpdated(){
+        Toast.makeText(context,context.getResources().getString(R.string.qualification_updated),Toast.LENGTH_SHORT).show();
+        //Intent homeActivity = new Intent(activity, HomeActivity.class);
+        //activity.startActivity(homeActivity);
+        //activity.finish();
+    }
 }

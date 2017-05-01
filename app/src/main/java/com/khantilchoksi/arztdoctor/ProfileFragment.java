@@ -3,22 +3,12 @@ package com.khantilchoksi.arztdoctor;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NavUtils;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -30,25 +20,23 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
-import com.khantilchoksi.arztdoctor.ArztAsyncCalls.GetPatientProfileTask;
-import com.khantilchoksi.arztdoctor.ArztAsyncCalls.SavePatientProfileTask;
+import com.khantilchoksi.arztdoctor.ArztAsyncCalls.GetDoctorMainSpecialitiesTask;
+import com.khantilchoksi.arztdoctor.ArztAsyncCalls.GetDoctorProfileTask;
+import com.khantilchoksi.arztdoctor.ArztAsyncCalls.GetDoctorQualitficationsTask;
+import com.khantilchoksi.arztdoctor.ArztAsyncCalls.SaveDoctorQualificationTask;
+import com.khantilchoksi.arztdoctor.ArztAsyncCalls.SaveDoctorSpecialityTask;
+import com.khantilchoksi.arztdoctor.ArztAsyncCalls.SaveDoctorProfileTask;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -62,7 +50,7 @@ import java.util.Locale;
  * Use the {@link ProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ProfileFragment extends Fragment implements MultiSelectionSpinner.OnMultipleItemsSelectedListener,GetPatientProfileTask.AsyncResponse,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+public class ProfileFragment extends Fragment implements GetDoctorProfileTask.AsyncResponse, GetDoctorQualitficationsTask.AsyncResponse, GetDoctorMainSpecialitiesTask.AsyncResponse{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -87,31 +75,19 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
     private EditText mFullNameEditText;
     private EditText mMobileEditText;
     private RadioGroup mGenderRadioGroup;
-    private Spinner mBloodGroupSpinner;
-    private EditText mEmergencyMobileEditText;
-    private TextView mAddressText;
-    private TextView mPostalCode;
-    private TextView mArea;
-    private TextView mCity;
-    private TextView mState;
+    private EditText mEmailEditText;
     private Button mSaveButton;
+    private MultiSelectionSpinner multiSelectionQualificaitonSpinner;
+    private MultiSelectionSpinner multiSelectionSpecialitySpinner;
 
-    private double mLatitude = 0;
-    private double mLongitude = 0;
 
     private ProgressDialog progressDialog;
 
     //user entered values
     String fullName = null;
     int gender = 0;
-    int bloodGroup = 0;
+
     String birthdate = null;
-    String emergencyMobileNumber = null;
-    String fullAddress = "";
-    String mPinCode = null;
-    String cityName = null;
-    String areaName = null;
-    String stateName = null;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -181,23 +157,15 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
         drawable.setCircular(true);
         userProfilePhoto.setImageDrawable(drawable);
 
-        setUpBloodGroupSpinner();
-
 
         mFullNameEditText = (EditText) mRootView.findViewById(R.id.full_name);
-        mFullNameEditText.setText(Utility.getPatientFullName(getContext()));
+        //mFullNameEditText.setText(Utility.getPatientFullName(getContext()));
 
         mMobileEditText = (EditText) mRootView.findViewById(R.id.mobile_number);
         mMobileEditText.setText(Utility.getPatientMobileNumber(getContext()));
 
         mGenderRadioGroup = (RadioGroup) mRootView.findViewById(R.id.radio_group_gender);
 
-        mEmergencyMobileEditText = (EditText) mRootView.findViewById(R.id.emergency_mobile);
-        mAddressText = (TextView) mRootView.findViewById(R.id.address);
-        mPostalCode = (TextView) mRootView.findViewById(R.id.pincode);
-        mArea = (TextView) mRootView.findViewById(R.id.area);
-        mCity = (TextView) mRootView.findViewById(R.id.city);
-        mState = (TextView) mRootView.findViewById(R.id.state);
 
         final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
@@ -223,21 +191,28 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
             }
         });
 
+
+        mEmailEditText = (EditText) mRootView.findViewById(R.id.email_id);
+
+        setUpDegreeSpinner();
+
+        //setUpSpecialitySpinner();
+
         //setUpCitySpinner();
-        progressDialog = new ProgressDialog(getActivity(),
+        /*progressDialog = new ProgressDialog(getActivity(),
                 R.style.AppTheme_Dark_Dialog);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Fetching Profile Info...");
         progressDialog.show();
-        GetPatientProfileTask getPatientProfileTask = new GetPatientProfileTask(getContext(),getActivity(),this,progressDialog);
-        getPatientProfileTask.execute((Void) null);
+        GetDoctorProfileTask getPatientProfileTask = new GetDoctorProfileTask(getContext(),getActivity(),this,progressDialog);
+        getPatientProfileTask.execute((Void) null);*/
 
         //degree spinner
-        setUpDegreeSpinner();
+        //setUpDegreeSpinner();
 
-        setUpSpecialitySpinner();
+        //setUpSpecialitySpinner();
 
-        buildGoogleApiClient();
+        /*buildGoogleApiClient();
 
         Button detectCurrentLocationButton = (Button) mRootView.findViewById(R.id.detect_current_location_button);
         detectCurrentLocationButton.setOnClickListener(new View.OnClickListener() {
@@ -247,7 +222,7 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
                     mGoogleApiClient.connect();
                 }
             }
-        });
+        });*/
 
 
 
@@ -263,19 +238,24 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
     }
 
     @Override
-    public void processFinish(String fullName, int gender, int bloodGroup, String birthdate,
-                              String emergencyMobileNumber,
-                              String latitude, String longitude, String fullAddress, String pincode, ProgressDialog progressDialog) {
-        //GetPatientProfileTask finished
+    public void processFinish(String fullName, int gender, String birthdate, String emailId,
+                              ArrayList<String>  qualificationList, ArrayList<String> specialityList, ProgressDialog progressDialog) {
+        //GetDoctorProfileTask finished
         mFullNameEditText.setText(fullName);
         setGenderRadioButton(gender);
-        mBloodGroupSpinner.setSelection(bloodGroup);
+
         setBirthdate(birthdate);
-        mEmergencyMobileEditText.setText(emergencyMobileNumber);
-        mLatitude = Double.valueOf(latitude);
-        mLongitude = Double.valueOf(longitude);
-        mAddressText.setText(fullAddress);
-        mPostalCode.setText(pincode);
+
+        mEmailEditText.setText(emailId);
+
+
+        Log.d(LOG_TAG, "Received selected qualification list: "+qualificationList);
+        multiSelectionQualificaitonSpinner.setSelection(qualificationList);
+
+        Log.d(LOG_TAG, "Received selected speciality list: "+specialityList);
+
+        multiSelectionSpecialitySpinner.setSelection(specialityList);
+
 
         progressDialog.dismiss();
     }
@@ -311,59 +291,11 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
         birthdayEditTextView.setText(sdf.format(myCalendar.getTime()));
     }
 
-    private void setUpBloodGroupSpinner(){
-        //BloodGroup Spinner Spinner
-        String[] bloodGroupData = {
-                "A+",
-                "A-",
-                "AB+",
-                "AB-",
-                "B+",
-                "B-",
-                "O+",
-                "O-",
-
-        };
-
-        final SpinnerAdapter bloodGroupArrayAdapter = new SpinnerAdapter(getActivity(), R.layout.spinner_item, bloodGroupData, getContext().getString(R.string.prompt_blood_group));
-
-        mBloodGroupSpinner = (Spinner) mRootView.findViewById(R.id.bloodGroupSpinner);
-        mBloodGroupSpinner.setAdapter(bloodGroupArrayAdapter);
-
-        mBloodGroupSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(position>0){
-                    bloodGroupArrayAdapter.setSelectedItem(position);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-
-        });
-
-    }
-
     private void setUpDegreeSpinner(){
-        String[] array = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
-        MultiSelectionSpinner multiSelectionSpinner = (MultiSelectionSpinner) mRootView.findViewById(R.id.degreeSpinner);
-        multiSelectionSpinner.setSpinnerTitle("Select Degrees");
-        multiSelectionSpinner.setItems(array);
-        multiSelectionSpinner.setSelection(new int[]{2, 6});
-        multiSelectionSpinner.setListener(this);
-    }
+        multiSelectionQualificaitonSpinner = (MultiSelectionSpinner) mRootView.findViewById(R.id.degreeSpinner);
+        multiSelectionQualificaitonSpinner.setSpinnerTitle("Select Degrees");
 
-    private void setUpSpecialitySpinner(){
-        String[] array = {"Ontology", "Physician", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
-        MultiSelectionSpinner multiSelectionSpinner = (MultiSelectionSpinner) mRootView.findViewById(R.id.speciality_spinner);
-        multiSelectionSpinner.setSpinnerTitle("Select Your Specialities");
-        multiSelectionSpinner.setItems(array);
-        multiSelectionSpinner.setSelection(new int[]{2, 6});
-        multiSelectionSpinner.setListener(new MultiSelectionSpinner.OnMultipleItemsSelectedListener() {
+        multiSelectionQualificaitonSpinner.setListener(new MultiSelectionSpinner.OnMultipleItemsSelectedListener() {
             @Override
             public void selectedIndices(List<Integer> indices) {
 
@@ -371,9 +303,53 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
 
             @Override
             public void selectedStrings(List<String> strings) {
-                Toast.makeText(getContext(), "Heya"+strings.toString(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(getContext(), strings.toString(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(getContext(), "Heya"+strings.toString(), Toast.LENGTH_LONG).show();
+                Log.d(LOG_TAG,"Qualification List: "+strings.toString());
+                SaveDoctorQualificationTask saveDoctorQualificationTask = new SaveDoctorQualificationTask(
+                        getContext(),getActivity(), strings);
+                saveDoctorQualificationTask.execute((Void) null);
+
             }
         });
+
+        progressDialog = new ProgressDialog(getActivity(),
+                R.style.AppTheme_Dark_Dialog);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Fetching Profile Info...");
+        progressDialog.show();
+
+        GetDoctorQualitficationsTask getDoctorQualitficationsTask = new GetDoctorQualitficationsTask(getContext(),
+                getActivity(),this,progressDialog);
+        getDoctorQualitficationsTask.execute((Void) null);
+    }
+
+    private void setUpSpecialitySpinner(){
+
+        multiSelectionSpecialitySpinner = (MultiSelectionSpinner) mRootView.findViewById(R.id.speciality_spinner);
+        multiSelectionSpecialitySpinner.setSpinnerTitle("Select Your Specialities");
+
+        multiSelectionSpecialitySpinner.setListener(new MultiSelectionSpinner.OnMultipleItemsSelectedListener() {
+            @Override
+            public void selectedIndices(List<Integer> indices) {
+
+            }
+
+            @Override
+            public void selectedStrings(List<String> strings) {
+                //Toast.makeText(getContext(), strings.toString(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(getContext(), "Heya"+strings.toString(), Toast.LENGTH_LONG).show();
+                Log.d(LOG_TAG,"Speciality List: "+strings.toString());
+                SaveDoctorSpecialityTask saveDoctorSpecialityTask = new SaveDoctorSpecialityTask(
+                        getContext(),getActivity(), strings);
+                saveDoctorSpecialityTask.execute((Void) null);
+
+            }
+        });
+
+        GetDoctorMainSpecialitiesTask getDoctorMainSpecialitiesTask = new GetDoctorMainSpecialitiesTask(getContext(),
+                getActivity(),this,progressDialog);
+        getDoctorMainSpecialitiesTask.execute((Void) null);
     }
 
     /*private void setUpCitySpinner(){
@@ -426,9 +402,6 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
 
     @Override
     public void onStop() {
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
         super.onStop();
     }
 
@@ -469,14 +442,12 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
                 break;
         }
 
-        bloodGroup = mBloodGroupSpinner.getSelectedItemPosition();
 
         String myFormat = "dd-MM-yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
         birthdate = sdf.format(myCalendar.getTime());
 
-        Log.d(LOG_TAG," Profile Details: "+fullName+gender+"Blood Group: "+bloodGroup+" Birthdate: " +birthdate+" Emergency: "+emergencyMobileNumber+
-                String.valueOf(mLatitude)+String.valueOf(mLongitude)+fullAddress+mPinCode);
+
 
         progressDialog = new ProgressDialog(getActivity(),
                 R.style.AppTheme_Dark_Dialog);
@@ -484,30 +455,23 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
         progressDialog.setMessage("Saving Profile Info...");
         progressDialog.show();
 
-        SavePatientProfileTask savePatientProfileTask = new SavePatientProfileTask(getContext(), getActivity(),
-                fullName,gender,bloodGroup,birthdate,emergencyMobileNumber,
-                String.valueOf(mLatitude),String.valueOf(mLongitude),fullAddress,mPinCode,progressDialog);
-        savePatientProfileTask.execute((Void) null);
+        SaveDoctorProfileTask saveDoctorProfileTask = new SaveDoctorProfileTask(getContext(), getActivity(),
+                fullName,gender,birthdate,progressDialog);
+        saveDoctorProfileTask.execute((Void) null);
     }
 
     public boolean validate() {
         boolean valid = true;
 
         mFullNameEditText.setError(null);
-        mEmergencyMobileEditText.setError(null);
-
 
         fullName = mFullNameEditText.getText().toString();
-        emergencyMobileNumber = mEmergencyMobileEditText.getText().toString();
+
 
         View focusView = null;
         if(fullName.isEmpty()){
             mFullNameEditText.setError(getString(R.string.error_field_required));
             focusView = mFullNameEditText;
-            valid = false;
-        } else if (!Utility.isMobileValid(emergencyMobileNumber)) {
-            mEmergencyMobileEditText.setError(getString(R.string.error_invalid_mobileNo));
-            focusView = mEmergencyMobileEditText;
             valid = false;
         }
 
@@ -519,210 +483,28 @@ public class ProfileFragment extends Fragment implements MultiSelectionSpinner.O
         return valid;
     }
 
-    public void buildGoogleApiClient(){
-        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
 
-        /*LocationManager locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
 
-        Criteria locationCritera = new Criteria();
-        locationCritera.setAccuracy(Criteria.ACCURACY_FINE);
-        locationCritera.setAltitudeRequired(false);
-        locationCritera.setBearingRequired(false);
-        locationCritera.setCostAllowed(true);
-        locationCritera.setPowerRequirement(Criteria.NO_REQUIREMENT);
+    @Override
+    public void processDoctorQualificationFinish(ArrayList<Integer> qualificationIdList, ArrayList<String> qualificationNameList) {
+        //doctor qualifications
+        //String[] array = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
+        multiSelectionQualificaitonSpinner.setItems(qualificationNameList);
 
-        String providerName = locationManager.getBestProvider(locationCritera, true);
-
-        if (providerName != null && locationManager.isProviderEnabled(providerName)) {
-            // Provider is enabled
-            //locationManager.requestLocationUpdates(providerName, 20000, 100, this);
-        } else {
-            // Provider not enabled, prompt user to enable it
-            Toast.makeText(getContext(), "Please turn on GPS!", Toast.LENGTH_LONG).show();
-            Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            getActivity().startActivity(myIntent);
-        }*/
-
-        //then connect to google api client
+        setUpSpecialitySpinner();
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        checkLocationPermissions();
-    }
+    public void processSpecialityFinish(ArrayList<String> specialityNameList, ArrayList<String> specialityDescriptionList, ArrayList<String> specialityIconUrlList) {
+        //String[] array = {"Ontology", "Physician", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(LOG_TAG, "Connection Suspended.");
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.d(LOG_TAG,"Connection Failed: "+connectionResult.getErrorMessage());
-    }
-
-    public void checkLocationPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                        android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                    // Show an explanation to the user *asynchronously* -- don't block
-                    // this thread waiting for the user's response! After the user
-                    // sees the explanation, try again to request the permission.
-                    // Display a SnackBar with an explanation and a button to trigger the request.
-                    Snackbar.make(mRootView, "Permission needed for location services.",
-                            Snackbar.LENGTH_INDEFINITE)
-                            .setAction("Ok", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                        requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                                                REQUEST_LOCATION);
-                                    }
-                                    Log.d("Permission", "After denying, Permission is Requested for location!");
-                                }
-
-                            })
-                            .show();
-
-                } else {
-                    // No explanation needed, we can request the permission.
-
-                    requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                            REQUEST_LOCATION);
+        multiSelectionSpecialitySpinner.setItems(specialityNameList);
 
 
-                }
-
-            } else {
-
-                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                updateAddressDetails();
-            }
-        }
-    }
-
-    private void updateAddressDetails(){
-
-        if(mLastLocation!= null) {
-            mLatitude = mLastLocation.getLatitude();
-            mLongitude = mLastLocation.getLongitude();
+        GetDoctorProfileTask getPatientProfileTask = new GetDoctorProfileTask(getContext(),getActivity(),this,progressDialog);
+        getPatientProfileTask.execute((Void) null);
 
 
-            Geocoder gcd = new Geocoder(getActivity().getBaseContext(), Locale.getDefault());
-            List<Address> addresses;
-            try {
-                addresses = gcd.getFromLocation(mLastLocation.getLatitude(),
-                        mLastLocation.getLongitude(), 1);
-                if (addresses.size() > 0) {
-                    for (int i = 0; i < addresses.get(0).getMaxAddressLineIndex(); i++)
-                        fullAddress += addresses.get(0).getAddressLine(i) + "\n";
-
-                    mPinCode = addresses.get(0).getPostalCode();
-                    areaName = addresses.get(0).getSubLocality();
-                    cityName = addresses.get(0).getLocality();
-                    stateName = addresses.get(0).getAdminArea();
-
-                    mAddressText.setText(fullAddress);
-                    mPostalCode.setText(mPinCode);
-                    mArea.setText(areaName);
-                    mCity.setText(cityName);
-                    mState.setText(stateName);
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }else{
-            Log.d(LOG_TAG,"mLastLocation object is null");
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_LOCATION) {
-            if (grantResults.length == 1
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // We can now safely use the API we requested access to
-
-
-
-                if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                        ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-                updateAddressDetails();
-
-            } else {
-                // Permission was denied or request was cancelled
-                if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                        android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                    // Show an explanation to the user *asynchronously* -- don't block
-                    // this thread waiting for the user's response! After the user
-                    // sees the explanation, try again to request the permission.
-                    // Display a SnackBar with an explanation and a button to trigger the request.
-                    Log.d("Permission", "In the result if");
-                    Snackbar.make(mRootView, "Give me Permissions!",
-                            Snackbar.LENGTH_INDEFINITE)
-                            .setAction("Ok", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-//                                    ActivityCompat.requestPermissions(,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-//                                            REQUEST_LOCATION);
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                        requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                                                REQUEST_LOCATION);
-                                    }
-                                }
-                            })
-                            .show();
-
-                } else {
-                    //User has checked never show me again
-                    Log.d("Permission", "User has checked never show me again.");
-                    Snackbar.make(mRootView, "Go to Settings",
-                            Snackbar.LENGTH_INDEFINITE)
-                            .setAction("Settrings", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                            Uri.fromParts("package", getActivity().getPackageName(), null));
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    startActivity(intent);
-                                }
-                            })
-                            .show();
-                }
-
-            }
-        }
-    }
-
-    @Override
-    public void selectedIndices(List<Integer> indices) {
-
-    }
-
-    @Override
-    public void selectedStrings(List<String> strings) {
-        Toast.makeText(getContext(), strings.toString(), Toast.LENGTH_LONG).show();
     }
 
 

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.SpinnerAdapter;
 
@@ -61,6 +62,10 @@ public class MultiSelectionSpinner extends android.support.v7.widget.AppCompatSp
             throw new IllegalArgumentException(
                     "Argument 'which' is out of bounds.");
         }
+        if(!isChecked){
+            Log.d("Multiselection Spinner"," "+_items[which]+" is de-selected.");
+        }
+
     }
 
     @Override
@@ -145,6 +150,7 @@ public class MultiSelectionSpinner extends android.support.v7.widget.AppCompatSp
         for (String sel : selection) {
             for (int j = 0; j < _items.length; ++j) {
                 if (_items[j].equals(sel)) {
+                    Log.d("MultiselectionSpinner"," items[j]: "+_items[j]+" selection: "+selection);
                     mSelection[j] = true;
                     mSelectionAtStart[j] = true;
                 }

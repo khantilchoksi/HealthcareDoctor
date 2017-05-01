@@ -94,4 +94,6 @@
     <string name="no_appointments_avaliable">You don\'t have any upcoming appointments.</string>
     <string name="cancel_appointment">Cancel</string>
     <string name="edit">Edit</string>
+    <string name="qualification_updated">Qualifications updated successfully.</string>
+    <string name="speciality_updated">Your specialities updated successfully.</string>
 </resources>

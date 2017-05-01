@@ -3,16 +3,15 @@ package com.khantilchoksi.arztdoctor.ArztAsyncCalls;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.khantilchoksi.arztdoctor.HomeActivity;
 import com.khantilchoksi.arztdoctor.R;
 import com.khantilchoksi.arztdoctor.Utility;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,6 +25,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,39 +35,33 @@ import java.util.Map;
  * Created by Khantil on 22-03-2017.
  */
 
-public class SavePatientProfileTask extends AsyncTask<Void, Void, Boolean> {
+public class GetDoctorProfileTask extends AsyncTask<Void, Void, Boolean> {
 
-    private static final String LOG_TAG = SavePatientProfileTask.class.getSimpleName();
+    private static final String LOG_TAG = GetDoctorProfileTask.class.getSimpleName();
     Context context;
     Activity activity;
     String fullName;
     int gender;
-    int bloodGroup;
+    ArrayList<String> qualificationList;
+    ArrayList<String> specialityList;
+    String emailId;
     String birthdate;
-    String emergencyMobileNumber;
-    String latitude;
-    String longitude;
-    String fullAddress;
-    String pincode;
     ProgressDialog progressDialog;
 
-    public SavePatientProfileTask(Context context, Activity activity, String fullName, int gender, int bloodGroup, String birthdate,
-                                  String emergencyMobileNumber,
-                                  String latitude, String longitude, String fullAddress, String pincode, ProgressDialog progressDialog){
+    public interface AsyncResponse {
+        void processFinish(String fullName, int gender, String birthdate, String emailId,
+                           ArrayList<String> qualificationList, ArrayList<String> specialityList,ProgressDialog progressDialog);
+    }
+
+    public AsyncResponse delegate = null;
+
+    public GetDoctorProfileTask(Context context, Activity activity, AsyncResponse delegate, ProgressDialog progressDialog){
         this.context = context;
         this.activity = activity;
-        this.fullName = fullName;
-        this.gender = gender;
-        this.bloodGroup = bloodGroup;
-        this.birthdate = birthdate;
-        this.emergencyMobileNumber = emergencyMobileNumber;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.fullAddress = fullAddress;
-        this.pincode = pincode;
+        this.delegate = delegate;
         this.progressDialog = progressDialog;
-
-
+        this.qualificationList = new ArrayList<String>();
+        this.specialityList = new ArrayList<String>();
     }
 
     @Override
@@ -79,7 +73,7 @@ public class SavePatientProfileTask extends AsyncTask<Void, Void, Boolean> {
 
         try {
 
-            final String CLIENT_BASE_URL = context.getResources().getString(R.string.base_url).concat("setPatientProfileDetails");
+            final String CLIENT_BASE_URL = context.getResources().getString(R.string.base_url).concat("getDoctorProfileDetails");
             URL url = new URL(CLIENT_BASE_URL);
 
 
@@ -93,16 +87,7 @@ public class SavePatientProfileTask extends AsyncTask<Void, Void, Boolean> {
 
             Uri.Builder builder = new Uri.Builder();
             Map<String, String> parameters = new HashMap<>();
-            parameters.put("pid", String.valueOf(Utility.getDoctorId(context)));
-            parameters.put("fullName", fullName);
-            parameters.put("gender", String.valueOf(gender));
-            parameters.put("bloodGroup", String.valueOf(bloodGroup));
-            parameters.put("birthdate", birthdate);
-            parameters.put("emergencyMobileNumber", emergencyMobileNumber);
-            parameters.put("latitude",latitude);
-            parameters.put("longitude",longitude);
-            parameters.put("fullAddress",fullAddress);
-            parameters.put("pincode",pincode);
+            parameters.put("did", String.valueOf(Utility.getDoctorId(context)));
 
             // encode parameters
             Iterator entries = parameters.entrySet().iterator();
@@ -162,7 +147,7 @@ public class SavePatientProfileTask extends AsyncTask<Void, Void, Boolean> {
 
             clientCredStr = buffer.toString();
 
-            Log.d(LOG_TAG, "Client Credential JSON String : " + clientCredStr);
+            Log.d(LOG_TAG, "Doctor Profile Credential JSON String : " + clientCredStr);
 
 
             return isSuccessfullyUpdate(clientCredStr);
@@ -201,7 +186,7 @@ public class SavePatientProfileTask extends AsyncTask<Void, Void, Boolean> {
         Log.d(LOG_TAG, "Success Boolean Tag: " + success.toString());
         if (success) {
 
-            successfullyUpdated();
+            delegate.processFinish(fullName,gender,birthdate,emailId,qualificationList,specialityList,progressDialog);
 
         } else {
 
@@ -218,27 +203,44 @@ public class SavePatientProfileTask extends AsyncTask<Void, Void, Boolean> {
 
     private boolean isSuccessfullyUpdate(String clientCredStr) throws JSONException {
 
-        final String successfullyUpdatedString = "successfullyUpdated";
+
+        final String fullNameString = "fullName";
+        final String genderString = "gender";
+        final String birthdateString = "birthdate";
+        final String emailIdString = "emailId";
+        final String qualificaitonListString = "qualificationList";
+        final String qualificationNameString = "qualificationName";
+        final String specialityListString = "specialityList";
+        final String specialityNameString = "specialityName";
 
 
         JSONObject clientJson = new JSONObject(clientCredStr);
-        String isSuccessfullyUpdated = clientJson.getString(successfullyUpdatedString);
-        if (isSuccessfullyUpdated.contains("true")) {
-            //Profile details successfully created
+        fullName = clientJson.getString(fullNameString);
+        gender = Integer.valueOf(clientJson.getString(genderString));
+        birthdate =clientJson.getString(birthdateString);
+        emailId = clientJson.getString(emailIdString);
 
-            return true;
-        } else {
-            //Profile details not created successfully
+        JSONArray qualificationJsonArray = clientJson.getJSONArray(qualificaitonListString);
 
+        String tempQualificationName;
+        for(int i=0;i<qualificationJsonArray.length();i++){
+            JSONObject qualificationJSONObject = qualificationJsonArray.getJSONObject(i);
+            tempQualificationName = qualificationJSONObject.getString(qualificationNameString);
+            qualificationList.add(tempQualificationName);
         }
 
-        return false;
+        JSONArray specialityJsonArray = clientJson.getJSONArray(specialityListString);
+
+        String tempSpecialityName;
+        for(int i=0;i<specialityJsonArray.length();i++){
+            JSONObject specilaityJSONObject = specialityJsonArray.getJSONObject(i);
+            tempSpecialityName = specilaityJSONObject.getString(specialityNameString);
+            specialityList.add(tempSpecialityName);
+        }
+
+
+        return true;
     }
 
-    public void successfullyUpdated(){
-        Toast.makeText(context,context.getResources().getString(R.string.profile_updated),Toast.LENGTH_SHORT).show();
-        Intent homeActivity = new Intent(activity, HomeActivity.class);
-        activity.startActivity(homeActivity);
-        activity.finish();
-    }
+
 }
