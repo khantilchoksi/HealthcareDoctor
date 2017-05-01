@@ -72,7 +72,7 @@
 
 
     <item name="prompt_blood_group" type="id">Choose Blood Group</item>
-    <string name="title_activity_home">Arzt</string>
+    <string name="title_activity_home">Arzt Partner</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="profile_updated">Profile Details Updated!</string>
     <string name="title_activity_add_existing_clinics">AddExistingClinicsActivity</string>
