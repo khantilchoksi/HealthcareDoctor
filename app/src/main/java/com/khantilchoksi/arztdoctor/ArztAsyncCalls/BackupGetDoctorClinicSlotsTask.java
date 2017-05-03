@@ -270,7 +270,7 @@ public class BackupGetDoctorClinicSlotsTask extends AsyncTask<Void, Void, Boolea
 
                 Log.d(LOG_TAG, "Slot id : "+slotId+"Slot Day: " + slotDay+"Slot Start TIme:"+slotStartTime);
 
-                slotsList.add(new Slot(slotId,slotDay,slotStartTime,slotEndTime,slotFees));
+                //slotsList.add(new Slot(slotId,slotDay,slotStartTime,slotEndTime,slotFees));
             }
 
 

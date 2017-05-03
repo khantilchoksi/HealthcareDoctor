@@ -26,23 +26,40 @@ public class Slot {
     private int dayIndex = 0;
     private String startTime = null;
     private String endTime = null;
-    private int slotFees;
+    private int firstTimeSlotFees;
+    private int normalSlotFees;
 
     public String getSlotId() {
         return slotId;
     }
 
-    public int getSlotFees() {
-        return slotFees;
+
+    public void setFirstTimeSlotFees(int firstTimeSlotFees) {
+        this.firstTimeSlotFees = firstTimeSlotFees;
     }
 
-    public Slot(String slotId, String day, String startTime, String endTime, int slotFees) {
+    public void setNormalSlotFees(int normalSlotFees) {
+        this.normalSlotFees = normalSlotFees;
+    }
+
+    public int getFirstTimeSlotFees() {
+
+        return firstTimeSlotFees;
+    }
+
+    public int getNormalSlotFees() {
+        return normalSlotFees;
+    }
+
+    public Slot(String slotId, String day, String startTime, String endTime, int firstTimeSlotFees, int normalSlotFees) {
 
         this.slotId = slotId;
         this.day = day;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.slotFees = slotFees;
+        this.firstTimeSlotFees = firstTimeSlotFees;
+        this.normalSlotFees = normalSlotFees;
+
     }
 
     public void setDay(String day) {

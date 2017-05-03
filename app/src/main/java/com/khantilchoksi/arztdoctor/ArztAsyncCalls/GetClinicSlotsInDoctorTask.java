@@ -34,9 +34,9 @@ import java.util.Map;
  * Created by Khantil on 22-03-2017.
  */
 
-public class GetSlotsTask extends AsyncTask<Void, Void, Boolean> {
+public class GetClinicSlotsInDoctorTask extends AsyncTask<Void, Void, Boolean> {
 
-    private static final String LOG_TAG = GetSlotsTask.class.getSimpleName();
+    private static final String LOG_TAG = GetClinicSlotsInDoctorTask.class.getSimpleName();
     Context context;
     String mClinicId;
     ArrayList<Slot> slotsList;
@@ -48,7 +48,7 @@ public class GetSlotsTask extends AsyncTask<Void, Void, Boolean> {
 
     public AsyncResponse delegate = null;
 
-    public GetSlotsTask(String clinicId, Context context, AsyncResponse delegate){
+    public GetClinicSlotsInDoctorTask(String clinicId, Context context, AsyncResponse delegate){
         this.mClinicId = clinicId;
         this.context = context;
         this.delegate = delegate;
@@ -65,7 +65,7 @@ public class GetSlotsTask extends AsyncTask<Void, Void, Boolean> {
 
         try {
 
-            final String CLIENT_BASE_URL = context.getResources().getString(R.string.base_url).concat("getDoctorClinicSlotDetails");
+            final String CLIENT_BASE_URL = context.getResources().getString(R.string.base_url).concat("getClinicSlotsInDoctorDetails");
             URL url = new URL(CLIENT_BASE_URL);
 
 
@@ -202,7 +202,8 @@ public class GetSlotsTask extends AsyncTask<Void, Void, Boolean> {
         final String slotDayString = "slotDay";
         final String slotStartTimeString = "slotStartTime";
         final String slotEndTimeString = "slotEndTime";
-        final String slotFeesString = "slotFees";
+        final String firstTimeSlotFeesString = "firstTimeSlotFees";
+        final String normalSlotFeesString = "normalSlotFees";
 
 
 
@@ -210,8 +211,8 @@ public class GetSlotsTask extends AsyncTask<Void, Void, Boolean> {
         String slotDay;
         String slotStartTime;
         String slotEndTime;
-        int slotFees;
-
+        int firstTimeSlotFees;
+        int normalSlotFees;
 
         JSONObject clientJson = new JSONObject(clientCredStr);
 
@@ -225,12 +226,12 @@ public class GetSlotsTask extends AsyncTask<Void, Void, Boolean> {
                 slotDay = slotJSONObject.getString(slotDayString);
                 slotStartTime = slotJSONObject.getString(slotStartTimeString);
                 slotEndTime = slotJSONObject.getString(slotEndTimeString);
-                slotFees = Integer.parseInt(slotJSONObject.getString(slotFeesString));
-
+                firstTimeSlotFees = Integer.parseInt(slotJSONObject.getString(firstTimeSlotFeesString));
+                normalSlotFees = Integer.parseInt(slotJSONObject.getString(normalSlotFeesString));
 
                 Log.d(LOG_TAG, "Slot id : "+slotId+"Slot Day: " + slotDay+"Slot Start TIme:"+slotStartTime);
 
-                slotsList.add(new Slot(slotId,slotDay,slotStartTime,slotEndTime,slotFees));
+                slotsList.add(new Slot(slotId,slotDay,slotStartTime,slotEndTime,firstTimeSlotFees,normalSlotFees));
             }
 
 

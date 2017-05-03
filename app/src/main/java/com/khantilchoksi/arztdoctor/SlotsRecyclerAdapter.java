@@ -38,14 +38,17 @@ public class SlotsRecyclerAdapter extends RecyclerView.Adapter<SlotsRecyclerAdap
             return slotEndTimeTextView;
         }
 
-        public TextView getSlotFeesTextView() {
-            return slotFeesTextView;
+        public TextView getFirstTimeSlotFeesTextView() {
+            return firstTimeSlotFeesTextView;
         }
 
         private TextView slotEndTimeTextView;
-        private TextView slotFeesTextView;
+        private TextView firstTimeSlotFeesTextView;
+        private TextView normalSlotFeesTextView;
 
-
+        public TextView getNormalSlotFeesTextView() {
+            return normalSlotFeesTextView;
+        }
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -61,8 +64,8 @@ public class SlotsRecyclerAdapter extends RecyclerView.Adapter<SlotsRecyclerAdap
             slotDayTextView = (TextView)itemView.findViewById(R.id.slot_day_text_view);
             slotStartTimeTextView = (TextView)itemView.findViewById(R.id.slot_start_time_text_view);
             slotEndTimeTextView = (TextView) itemView.findViewById(R.id.slot_end_time_text_view);
-            slotFeesTextView = (TextView) itemView.findViewById(R.id.slot_fees_text_view);
-
+            firstTimeSlotFeesTextView = (TextView) itemView.findViewById(R.id.first_time_slot_fees_text_view);
+            normalSlotFeesTextView = (TextView) itemView.findViewById(R.id.normal_slot_fees_text_view);
         }
     }
 
@@ -88,8 +91,10 @@ public class SlotsRecyclerAdapter extends RecyclerView.Adapter<SlotsRecyclerAdap
         holder.getSlotDayTextView().setText(mSlotsList.get(position).getDay());
         holder.getSlotStartTimeTextView().setText(mSlotsList.get(position).getStartTime());
         holder.getSlotEndTimeTextView().setText(mSlotsList.get(position).getEndTime());
-        holder.getSlotFeesTextView().setText(mContext.getResources().getString(R.string.rupee_symbol).
-                concat(" "+mSlotsList.get(position).getSlotFees()));
+        holder.getFirstTimeSlotFeesTextView().setText(mContext.getResources().getString(R.string.rupee_symbol).
+                concat(" "+mSlotsList.get(position).getFirstTimeSlotFees()));
+        holder.getNormalSlotFeesTextView().setText(mContext.getResources().getString(R.string.rupee_symbol).
+                concat(" "+mSlotsList.get(position).getNormalSlotFees()));
     }
 
     @Override

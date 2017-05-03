@@ -29,8 +29,10 @@ public class AddClinicTimeSlotsActivityFragment extends Fragment {
     private final String LOG_TAG = getClass().getSimpleName();
     private RecyclerView mRecyclerView;
     private EditText mConsultancyCostEditText;
+    private EditText mNormalConultancyFeesEditText;
     private EditText mMaxPatientsEditText;
     int mConsultationFees;
+    int mNormalConsulatationFees;
     int mMaxPatients;
     private ProgressDialog progressDialog;
     private ClinicSlotsRecyclerAdapter mClinicsSlotsRecyclerAdapter;
@@ -74,7 +76,9 @@ public class AddClinicTimeSlotsActivityFragment extends Fragment {
             }
         });
 
-        mConsultancyCostEditText = (EditText) mRootView.findViewById(R.id.consultation_charges_edit_text);
+        mConsultancyCostEditText = (EditText) mRootView.findViewById(R.id.first_consultation_charges_edit_text);
+
+        mNormalConultancyFeesEditText = (EditText) mRootView.findViewById(R.id.normal_consultation_charges_edit_text);
 
         mMaxPatientsEditText = (EditText)mRootView.findViewById(R.id.max_patients_edit_text);
 
@@ -112,7 +116,21 @@ public class AddClinicTimeSlotsActivityFragment extends Fragment {
         }catch (NumberFormatException e){
             valid = false;
             focusView = mConsultancyCostEditText;
-            mConsultancyCostEditText.setError(getContext().getResources().getString(R.string.error_invlaid_fees));
+            mConsultancyCostEditText.setError(getContext().getResources().getString(R.string.error_invalid_fees));
+        }
+
+        String normalConsulationFeesString = mNormalConultancyFeesEditText.getText().toString();
+        if(normalConsulationFeesString.isEmpty()){
+            valid = false;
+            focusView = mNormalConultancyFeesEditText;
+            mNormalConultancyFeesEditText.setError(getContext().getResources().getString(R.string.error_field_required));
+        }
+        try{
+            mNormalConsulatationFees = Integer.parseInt(normalConsulationFeesString);
+        }catch (NumberFormatException e){
+            valid = false;
+            focusView = mNormalConultancyFeesEditText;
+            mNormalConultancyFeesEditText.setError(getContext().getResources().getString(R.string.error_invalid_fees));
         }
 
 
@@ -149,7 +167,7 @@ public class AddClinicTimeSlotsActivityFragment extends Fragment {
             Slot tempSlot;
             for(int i = 0;i<mClinicsSlotsRecyclerAdapter.getItemCount();i++){
                 tempSlot = mClinicsSlotsRecyclerAdapter.getItemAtPosition(i);
-                new InsertClinicTimeSlotTask(getContext(),getActivity(),mClinicId,tempSlot,mConsultationFees,mMaxPatients,progressDialog).execute((Void) null);
+                new InsertClinicTimeSlotTask(getContext(),getActivity(),mClinicId,tempSlot,mConsultationFees,mNormalConsulatationFees,mMaxPatients,progressDialog).execute((Void) null);
 
             }
         }

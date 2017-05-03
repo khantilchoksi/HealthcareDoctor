@@ -55,6 +55,7 @@ public class InsertClinicTimeSlotTask extends AsyncTask<Void, Void, Boolean> {
     Slot mSlot;
     String mClinicId;
     int mFees;
+    int mNormalFees;
     int mMaxPatients;
     String issue;
     ProgressDialog progressDialog;
@@ -62,12 +63,13 @@ public class InsertClinicTimeSlotTask extends AsyncTask<Void, Void, Boolean> {
 
 
 
-    public InsertClinicTimeSlotTask(Context context, Activity activity, String clinicId, Slot slot, int fees,int maxPatients,ProgressDialog progressDialog){
+    public InsertClinicTimeSlotTask(Context context, Activity activity, String clinicId, Slot slot, int fees,int normalFees,int maxPatients,ProgressDialog progressDialog){
         this.context = context;
         this.activity = activity;
         this.mClinicId = clinicId;
         this.mSlot = slot;
         this.mFees = fees;
+        this.mNormalFees = normalFees;
         this.mMaxPatients = maxPatients;
         this.progressDialog = progressDialog;
         issue = context.getResources().getString(R.string.error_unknown_error);
@@ -103,6 +105,7 @@ public class InsertClinicTimeSlotTask extends AsyncTask<Void, Void, Boolean> {
             parameters.put("startTime", mSlot.getStartTime());
             parameters.put("endTime",mSlot.getEndTime());
             parameters.put("fees",String.valueOf(mFees));
+            parameters.put("fees2",String.valueOf(mNormalFees));
             parameters.put("maxPatients",String.valueOf(mMaxPatients));
 
             // encode parameters
@@ -208,6 +211,8 @@ public class InsertClinicTimeSlotTask extends AsyncTask<Void, Void, Boolean> {
                 //all done
                 //go to next activity
                 progressDialog.dismiss();
+
+                Toast.makeText(context,"Slots successfully added.",Toast.LENGTH_LONG).show();
 
                 Intent intent = new Intent(activity,HomeActivity.class);
                 activity.startActivity(intent);

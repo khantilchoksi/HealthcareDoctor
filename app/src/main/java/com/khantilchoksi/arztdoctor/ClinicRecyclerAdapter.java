@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.khantilchoksi.arztdoctor.ArztAsyncCalls.GetSlotsTask;
+import com.khantilchoksi.arztdoctor.ArztAsyncCalls.GetClinicSlotsInDoctorTask;
 
 import java.util.ArrayList;
 
@@ -103,7 +103,7 @@ public class ClinicRecyclerAdapter extends RecyclerView.Adapter<ClinicRecyclerAd
         holder.getClinicAddressTextView().setText(mClinicsList.get(position).getClinicAddress());
 
 
-        GetSlotsTask getSlotsTask = new GetSlotsTask(mClinicsList.get(position).getClinicId(), mContext, new GetSlotsTask.AsyncResponse() {
+        GetClinicSlotsInDoctorTask getSlotsTask = new GetClinicSlotsInDoctorTask(mClinicsList.get(position).getClinicId(), mContext, new GetClinicSlotsInDoctorTask.AsyncResponse() {
             @Override
             public void processSlotFinish(ArrayList<Slot> slotsList) {
                 SlotsRecyclerAdapter slotsRecyclerAdapter;
