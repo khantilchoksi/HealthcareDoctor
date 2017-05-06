@@ -25,7 +25,6 @@ public class ClinicRecyclerAdapter extends RecyclerView.Adapter<ClinicRecyclerAd
 
     private ArrayList<Clinic> mClinicsList;
 
-
     private Context mContext;
     private Activity mActivity;
 

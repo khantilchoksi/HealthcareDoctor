@@ -83,6 +83,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.khantilchoksi.arztdoctor.ShowClinicsActivity" />
         </activity>
+        <activity
+            android:name=".AppointmentsHistoryActivity"
+            android:label="@string/title_activity_appointments_history"
+            android:parentActivityName=".HomeActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.khantilchoksi.arztdoctor.HomeActivity" />
+        </activity>
     </application>
 
 </manifest>

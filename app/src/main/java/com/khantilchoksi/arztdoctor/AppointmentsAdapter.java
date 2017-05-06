@@ -25,6 +25,7 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
 
     private ArrayList<Appointment> mAppointmentsList;
     private Activity mActivity;
+    private boolean mIsCancelledButtonShown;
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
@@ -36,6 +37,10 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
         private final TextView appointmentEndTimeTextView;
         private final TextView clinicNameTextView;
         private final Button cancelAppointmentButton;
+
+        public Button getCancelAppointmentButton() {
+            return cancelAppointmentButton;
+        }
 
         public TextView getPatientNameTextView() {
             return patientNameTextView;
@@ -103,8 +108,9 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
         }
     }
 
-    public AppointmentsAdapter(ArrayList<Appointment> appointmentsList, Activity activity) {
+    public AppointmentsAdapter(ArrayList<Appointment> appointmentsList, boolean isCancelledButtonShown, Activity activity) {
         this.mAppointmentsList = appointmentsList;
+        this.mIsCancelledButtonShown= isCancelledButtonShown;
         this.mActivity = activity;
     }
 
@@ -122,6 +128,10 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
 
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
+        if(!mIsCancelledButtonShown){
+            //remove cancel button
+            holder.getCancelAppointmentButton().setVisibility(View.INVISIBLE);
+        }
         holder.getPatientNameTextView().setText(mAppointmentsList.get(position).getPatientName());
         holder.getAppointmentDateTextView().setText(mAppointmentsList.get(position).getAppointmentDate());
         holder.getAppointmentDayTextView().setText(mAppointmentsList.get(position).getAppointmentDay());
