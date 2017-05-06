@@ -55,7 +55,7 @@
                     android:textColor="@color/colorPrimary"/>
 
                 <android.support.v7.widget.AppCompatButton
-                    android:id="@+id/cancel_appointment_button"
+                    android:id="@+id/view_appointment_button"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
                     android:layout_alignParentEnd="true"
@@ -66,7 +66,7 @@
                     android:layout_marginRight="2dp"
                     android:background="@color/colorPrimary"
                     android:gravity="center"
-                    android:text="@string/cancel_appointment"
+                    android:text="View"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
 

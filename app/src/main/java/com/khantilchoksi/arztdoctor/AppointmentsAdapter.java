@@ -1,7 +1,7 @@
 package com.khantilchoksi.arztdoctor;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
-import com.khantilchoksi.arztdoctor.ArztAsyncCalls.CancelAppointmentTask;
 
 import java.util.ArrayList;
 
@@ -25,7 +23,7 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
 
     private ArrayList<Appointment> mAppointmentsList;
     private Activity mActivity;
-    private boolean mIsCancelledButtonShown;
+    //private boolean mIsCancelledButtonShown;
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
@@ -36,11 +34,12 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
         private final TextView appointmentStartTimeTextView;
         private final TextView appointmentEndTimeTextView;
         private final TextView clinicNameTextView;
-        private final Button cancelAppointmentButton;
+        private final Button viewAppointmentButton;
+        /*private final Button cancelAppointmentButton;
 
         public Button getCancelAppointmentButton() {
             return cancelAppointmentButton;
-        }
+        }*/
 
         public TextView getPatientNameTextView() {
             return patientNameTextView;
@@ -69,7 +68,18 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
         public ViewHolder(View itemView) {
             super(itemView);
 
-            cancelAppointmentButton = (Button) itemView.findViewById(R.id.cancel_appointment_button);
+            viewAppointmentButton = (Button) itemView.findViewById(R.id.view_appointment_button);
+            viewAppointmentButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent viewIntent = new Intent(mActivity,ViewAppointmentActivity.class);
+                    viewIntent.putExtra("appointmentId",
+                            mAppointmentsList.get(getAdapterPosition()).getAppointmentId());
+                    mActivity.startActivity(viewIntent);
+                }
+            });
+
+            /*cancelAppointmentButton = (Button) itemView.findViewById(R.id.cancel_appointment_button);
             cancelAppointmentButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -84,7 +94,7 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
                                     mActivity.getApplicationContext(),mActivity,progressDialog);
                     cancelAppointmentTask.execute((Void) null);
                 }
-            });
+            });*/
             /*itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -108,9 +118,9 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
         }
     }
 
-    public AppointmentsAdapter(ArrayList<Appointment> appointmentsList, boolean isCancelledButtonShown, Activity activity) {
+    public AppointmentsAdapter(ArrayList<Appointment> appointmentsList, Activity activity) {
         this.mAppointmentsList = appointmentsList;
-        this.mIsCancelledButtonShown= isCancelledButtonShown;
+        //this.mIsCancelledButtonShown= isCancelledButtonShown;
         this.mActivity = activity;
     }
 
@@ -128,10 +138,10 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
 
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
-        if(!mIsCancelledButtonShown){
+        /*if(!mIsCancelledButtonShown){
             //remove cancel button
             holder.getCancelAppointmentButton().setVisibility(View.INVISIBLE);
-        }
+        }*/
         holder.getPatientNameTextView().setText(mAppointmentsList.get(position).getPatientName());
         holder.getAppointmentDateTextView().setText(mAppointmentsList.get(position).getAppointmentDate());
         holder.getAppointmentDayTextView().setText(mAppointmentsList.get(position).getAppointmentDay());

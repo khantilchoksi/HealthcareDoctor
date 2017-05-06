@@ -52,7 +52,10 @@
         completions."
     </string>
 
-    <string name="base_url">https://testarzt.herokuapp.com/api/</string>
+    <string name="base_url2">https://testarzt.herokuapp.com/api/</string>
+
+    <string name="base_url">https://192.168.0.103/testarzt/public/</string>
+
     <string name="doc_specialtiybase_url"> https://testarzt.herokuapp.com/assets/images/specimg/</string>
     <string name="login_pref">MyLoginPref</string>
 
@@ -99,4 +102,11 @@
     <string name="qualification_updated">Qualifications updated successfully.</string>
     <string name="speciality_updated">Your specialities updated successfully.</string>
     <string name="title_activity_appointments_history">AppointmentsHistoryActivity</string>
+    <string name="title_activity_view_appointment">ViewAppointmentActivity</string>
+    <string name="title_activity_image_view_pager">ImageViewPagerActivity</string>
+
+    <string name="permission_camera">Write - Read permission are needed for taking pictures!</string>
+    <string name="ok">Ok</string>
+    <string name="permission_setting">Please enable permissions for gallery and photos.</string>
+    <string name="settings">Settings</string>
 </resources>
