@@ -2,12 +2,14 @@ package com.khantilchoksi.arztdoctor;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.khantilchoksi.arztdoctor.ArztAsyncCalls.GetClinicSlotsInDoctorTask;
@@ -41,6 +43,12 @@ public class ClinicRecyclerAdapter extends RecyclerView.Adapter<ClinicRecyclerAd
         private final TextView clinicNameTextView;
         private final TextView clinicAddressTextView;
 
+        public Button getViewClinicAppointmentsButton() {
+            return viewClinicAppointmentsButton;
+        }
+
+        private final Button viewClinicAppointmentsButton;
+
         private final RecyclerView slotsRecyclerView;
 
         public RecyclerView getSlotsRecyclerView() {
@@ -65,6 +73,8 @@ public class ClinicRecyclerAdapter extends RecyclerView.Adapter<ClinicRecyclerAd
 
                 }
             });*/
+
+            viewClinicAppointmentsButton = (Button) itemView.findViewById(R.id.view_appointment_button);
 
             clinicNameTextView = (TextView)itemView.findViewById(R.id.clinic_name);
             clinicAddressTextView = (TextView)itemView.findViewById(R.id.clinic_address_text_view);
@@ -93,7 +103,7 @@ public class ClinicRecyclerAdapter extends RecyclerView.Adapter<ClinicRecyclerAd
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         Log.d(LOG_TAG, "Element " + position + " set.");
 
         // Get element from your dataset at this position and replace the contents of the view
@@ -101,7 +111,16 @@ public class ClinicRecyclerAdapter extends RecyclerView.Adapter<ClinicRecyclerAd
         holder.getClinicNameTextView().setText(mClinicsList.get(position).getClinicName());
         holder.getClinicAddressTextView().setText(mClinicsList.get(position).getClinicAddress());
 
+        holder.getViewClinicAppointmentsButton().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                        Intent intent = new Intent(mActivity,ViewClinicAppointmentsActivity.class);
+                        intent.putExtra("clinicId",mClinicsList.get(position).getClinicId());
+                        intent.putExtra("clinicName",mClinicsList.get(position).getClinicName());
+                        mActivity.startActivity(intent);
 
+            }
+        });
         GetClinicSlotsInDoctorTask getSlotsTask = new GetClinicSlotsInDoctorTask(mClinicsList.get(position).getClinicId(), mContext, new GetClinicSlotsInDoctorTask.AsyncResponse() {
             @Override
             public void processSlotFinish(ArrayList<Slot> slotsList) {

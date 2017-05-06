@@ -686,9 +686,10 @@ public class ViewAppointmentActivityFragment extends Fragment implements GetDoct
                                                   ArrayList<String> attachementImagesPath,
                                                   ProgressDialog progressDialog) {
         mPatientNameEditText.setText(patientName);
-        mPatientGenderEditText.setText(patinetAge);
+        mPatientGenderEditText.setText(patientSex);
         mPatientAgeEditText.setText(patinetAge);
         mPatientBloodGroupEditText.setText(patientBloodGroup);
+        mPatientMobileNumberEditText.setText(patientMobileNumber);
 
         mClinicNameEditText.setText(clinicName);
         mAppointmentDateEditText.setText(appointmentDate);

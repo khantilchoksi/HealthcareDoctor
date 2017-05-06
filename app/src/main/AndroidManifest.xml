@@ -111,6 +111,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.khantilchoksi.arztdoctor.HomeActivity" />
         </activity>
+        <activity
+            android:name=".ViewClinicAppointmentsActivity"
+            android:label="@string/title_activity_view_clinic_appointments"
+            android:parentActivityName=".HomeActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.khantilchoksi.arztdoctor.HomeActivity" />
+        </activity>
     </application>
 
 </manifest>

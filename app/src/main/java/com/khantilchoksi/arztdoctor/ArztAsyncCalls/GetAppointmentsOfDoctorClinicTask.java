@@ -8,7 +8,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.khantilchoksi.arztdoctor.Appointment;
 import com.khantilchoksi.arztdoctor.R;
+import com.khantilchoksi.arztdoctor.Utility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,47 +40,29 @@ import java.util.Map;
  * Created by Khantil on 22-03-2017.
  */
 
-public class GetDoctorAppointmentDetailsTask extends AsyncTask<Void, Void, Boolean> {
+public class GetAppointmentsOfDoctorClinicTask extends AsyncTask<Void, Void, Boolean> {
 
-    private static final String LOG_TAG = GetDoctorAppointmentDetailsTask.class.getSimpleName();
+    private static final String LOG_TAG = GetAppointmentsOfDoctorClinicTask.class.getSimpleName();
     Context context;
     Activity activity;
-
-    String mAppointmentId;
-    String mPatientName;
-    String mPatientSex;
-    String mPatientAge;
-    String mPatientMobileNumber;
-    String mPatientBloodGroup;
-    String mClinicName;
-    String mAppointmentDay;
-    String mAppointmentDate;
-    String mVisitingHours;
-    String mConsultationFees;
-    ArrayList<String> mAttachementImagesPath;
-
+    ArrayList<Appointment> mAppointmetsList;
+    String mClinicId;
 
     ProgressDialog progressDialog;
 
     public interface AsyncResponse {
-        void processDoctorClinicTaskInfoFinish(String patientName, String patientSex,
-                                               String patinetAge, String patientMobileNumber,
-                                               String patientBloodGroup, String clinicName,
-                                               String appointmentDay, String appointmentDate,
-                                               String visitingHours,
-                                               String consultationFees,
-                                               ArrayList<String> attachementImagesPath,
-                                               ProgressDialog progressDialog);
+        void processFinish(ArrayList<Appointment> appointmentsList, ProgressDialog progressDialog);
     }
 
     public AsyncResponse delegate = null;
 
-    public GetDoctorAppointmentDetailsTask(String appointmentId, Context context, Activity activity, AsyncResponse asyncResponse, ProgressDialog progressDialog){
-        this.mAppointmentId = appointmentId;
+    public GetAppointmentsOfDoctorClinicTask(String clinicId, Context context, Activity activity, AsyncResponse asyncResponse, ProgressDialog progressDialog){
+        this.mClinicId = clinicId;
         this.context = context;
         this.activity = activity;
         this.delegate = asyncResponse;
         this.progressDialog = progressDialog;
+        mAppointmetsList = new ArrayList<Appointment>();
 
     }
 
@@ -91,7 +75,7 @@ public class GetDoctorAppointmentDetailsTask extends AsyncTask<Void, Void, Boole
 
         try {
 
-            final String CLIENT_BASE_URL = context.getResources().getString(R.string.base_url).concat("getDoctorAppointmentDetails");
+            final String CLIENT_BASE_URL = context.getResources().getString(R.string.base_url).concat("getAppointmentsOfDoctorClinics");
             URL url = new URL(CLIENT_BASE_URL);
 
 
@@ -105,8 +89,8 @@ public class GetDoctorAppointmentDetailsTask extends AsyncTask<Void, Void, Boole
 
             Uri.Builder builder = new Uri.Builder();
             Map<String, String> parameters = new HashMap<>();
-            parameters.put("appointmentId",mAppointmentId);
-
+            parameters.put("doctorId", String.valueOf(Utility.getDoctorId(context)));
+            parameters.put("clinicId",mClinicId);
 
             // encode parameters
             Iterator entries = parameters.entrySet().iterator();
@@ -205,21 +189,7 @@ public class GetDoctorAppointmentDetailsTask extends AsyncTask<Void, Void, Boole
         Log.d(LOG_TAG, "Success Boolean Tag: " + success.toString());
         if (success) {
 
-
-            delegate.processDoctorClinicTaskInfoFinish(
-                    mPatientName,
-                    mPatientSex,
-                    mPatientAge,
-                    mPatientMobileNumber,
-                    mPatientBloodGroup,
-                    mClinicName,
-                    mAppointmentDay,
-                    mAppointmentDate,
-                    mVisitingHours,
-                    mConsultationFees,
-                    mAttachementImagesPath,
-                    progressDialog
-            );
+            delegate.processFinish(mAppointmetsList,progressDialog);
 
         } else {
 
@@ -236,69 +206,59 @@ public class GetDoctorAppointmentDetailsTask extends AsyncTask<Void, Void, Boole
 
     private boolean fetchAppointmentsClinics(String clientCredStr) throws JSONException {
 
+        final String appointmentListString = "appointmentList";
 
 
-        final String mPatientNameString = "patientName";
-        final String mPatientSexString = "patientSex";
-        final String patientMobileNumberString = "patientMobileNumber";
-        final String patientAgeString = "patientAge";
-        final String patientBloodGroupString = "patientBloodGroup";
+        final String appointmentIdString = "appointmentId";
+        final String patientNameString = "patientName";
+        final String appointmentDateString = "appointmentDate";
+        final String appointmentDayString = "appointmentDay";
+        final String appointmentStartTimeString = "appointmentStartTime";
+        final String appointmentEndTimeString = "appointmentEndTime";
 
-        final String mClinicNameString = "clinicName";
-        final String mAppointmentDayString = "slotDay";
-        final String mAppointmentDateString = "appointmentDate";
-        final String mSlotStartTimeString = "slotStartTime";
-        final String mSlotEndTimeString = "slotEndTime";
-        final String mConsultationFeesString = "slotFees";
 
-        final String mAttachmentListString = "attachmentList";
-        final String prePathString = "prePath";
-
+        String appointmentId;
+        String patientName;
+        String appointmentDate;
+        String appointmentDay;
+        String appointmentStartTime;
+        String appointmentEndTime;
 
         JSONObject clientJson = new JSONObject(clientCredStr);
 
+        JSONArray appointmentsJsonArray = clientJson.getJSONArray(appointmentListString);
 
+        if(appointmentsJsonArray != null) {
 
-        if(clientJson != null) {
+            for (int i = 0; i < appointmentsJsonArray.length(); i++) {
+                JSONObject appointmentJSONObject = appointmentsJsonArray.getJSONObject(i);
 
-            mPatientName = clientJson.getString(mPatientNameString);
-            mPatientSex = clientJson.getString(mPatientSexString);
-            mPatientMobileNumber = clientJson.getString(patientMobileNumberString);
-            mPatientAge = clientJson.getString(patientAgeString);
-            mPatientBloodGroup = clientJson.getString(patientBloodGroupString);
+                appointmentId = appointmentJSONObject.getString(appointmentIdString);
+                patientName = appointmentJSONObject.getString(patientNameString);
+                appointmentDate = appointmentJSONObject.getString(appointmentDateString);
+                appointmentDay = appointmentJSONObject.getString(appointmentDayString);
+                appointmentStartTime = appointmentJSONObject.getString(appointmentStartTimeString);
+                appointmentEndTime = appointmentJSONObject.getString(appointmentEndTimeString);
 
+                Log.d(LOG_TAG, "Appointment Id: " + appointmentId);
 
-            mClinicName = clientJson.getString(mClinicNameString);
-            mAppointmentDay = clientJson.getString(mAppointmentDayString);
+                String myFormat = "yyyy-MM-dd"; //In which you need put here
+                SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+                try {
+                    Calendar myCalendar = Calendar.getInstance();
+                    myCalendar.setTime(sdf.parse(appointmentDate));
 
-            mVisitingHours = clientJson.getString(mSlotStartTimeString) + " - " + clientJson.getString(mSlotEndTimeString);
-            mConsultationFees = clientJson.getString(mConsultationFeesString);
+                    String myFormat2 = "MMMM dd, yyyy"; //In which you need put here
+                    SimpleDateFormat sdf2 = new SimpleDateFormat(myFormat2, Locale.US);
 
+                    appointmentDate = sdf2.format(myCalendar.getTime());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
 
-            String myFormat = "yyyy-MM-dd"; //In which you need put here
-            SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-            try {
-                Calendar myCalendar = Calendar.getInstance();
-                myCalendar.setTime(sdf.parse(clientJson.getString(mAppointmentDateString)));
-
-                myFormat = "EEEE, MMMM dd, yyyy"; //In which you need put here
-                sdf = new SimpleDateFormat(myFormat, Locale.US);
-
-                mAppointmentDate = sdf.format(myCalendar.getTime());
-
-            } catch (ParseException e) {
-                e.printStackTrace();
+                mAppointmetsList.add(new Appointment(appointmentId,patientName,appointmentDate,
+                        appointmentDay,appointmentStartTime,appointmentEndTime," "));
             }
-
-            String prePath = clientJson.getString(prePathString);
-            JSONArray pathsJsonArray = clientJson.getJSONArray(mAttachmentListString);
-            mAttachementImagesPath = new ArrayList<String>();
-            for(int j=0;j<pathsJsonArray.length();j++){
-                Log.d(LOG_TAG,"Image Path: "+prePath.concat(pathsJsonArray.getString(j)));
-                mAttachementImagesPath.add(prePath.concat(pathsJsonArray.getString(j)));
-            }
-
-            Log.d(LOG_TAG,"Image Path List from AsyncTask:"+mAttachementImagesPath.toString());
 
             return true;
         }
