@@ -101,9 +101,9 @@
     <string name="edit">Edit</string>
     <string name="qualification_updated">Qualifications updated successfully.</string>
     <string name="speciality_updated">Your specialities updated successfully.</string>
-    <string name="title_activity_appointments_history">AppointmentsHistoryActivity</string>
-    <string name="title_activity_view_appointment">ViewAppointmentActivity</string>
-    <string name="title_activity_image_view_pager">ImageViewPagerActivity</string>
+    <string name="title_activity_appointments_history">Appointments History</string>
+    <string name="title_activity_view_appointment">View Appointment</string>
+    <string name="title_activity_image_view_pager">Appointment Attachments</string>
 
     <string name="permission_camera">Write - Read permission are needed for taking pictures!</string>
     <string name="ok">Ok</string>

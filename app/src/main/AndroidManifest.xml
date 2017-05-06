@@ -69,6 +69,7 @@
         <activity
             android:name=".ShowClinicsActivity"
             android:label="@string/title_activity_show_clinics"
+            android:launchMode="singleTop"
             android:parentActivityName=".AddExistingClinicsActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -78,6 +79,7 @@
         <activity
             android:name=".AddClinicTimeSlotsActivity"
             android:label="@string/title_activity_add_clinic_time_slots"
+            android:launchMode="singleTop"
             android:parentActivityName=".ShowClinicsActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -87,6 +89,7 @@
         <activity
             android:name=".AppointmentsHistoryActivity"
             android:label="@string/title_activity_appointments_history"
+            android:launchMode="singleTop"
             android:parentActivityName=".HomeActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -97,6 +100,7 @@
             android:name=".ViewAppointmentActivity"
             android:label="@string/title_activity_view_appointment"
             android:parentActivityName=".HomeActivity"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -106,6 +110,7 @@
             android:name=".ImageViewPagerActivity"
             android:label="@string/title_activity_image_view_pager"
             android:parentActivityName=".HomeActivity"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -114,7 +119,7 @@
         <activity
             android:name=".ViewClinicAppointmentsActivity"
             android:label="@string/title_activity_view_clinic_appointments"
-            android:parentActivityName=".HomeActivity"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
