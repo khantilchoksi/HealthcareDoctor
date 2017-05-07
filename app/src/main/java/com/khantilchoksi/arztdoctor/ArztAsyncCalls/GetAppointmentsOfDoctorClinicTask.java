@@ -47,6 +47,7 @@ public class GetAppointmentsOfDoctorClinicTask extends AsyncTask<Void, Void, Boo
     Activity activity;
     ArrayList<Appointment> mAppointmetsList;
     String mClinicId;
+    String mClinicName;
 
     ProgressDialog progressDialog;
 
@@ -56,8 +57,9 @@ public class GetAppointmentsOfDoctorClinicTask extends AsyncTask<Void, Void, Boo
 
     public AsyncResponse delegate = null;
 
-    public GetAppointmentsOfDoctorClinicTask(String clinicId, Context context, Activity activity, AsyncResponse asyncResponse, ProgressDialog progressDialog){
+    public GetAppointmentsOfDoctorClinicTask(String clinicId, String clinicName,Context context, Activity activity, AsyncResponse asyncResponse, ProgressDialog progressDialog){
         this.mClinicId = clinicId;
+        this.mClinicName = clinicName;
         this.context = context;
         this.activity = activity;
         this.delegate = asyncResponse;
@@ -257,7 +259,7 @@ public class GetAppointmentsOfDoctorClinicTask extends AsyncTask<Void, Void, Boo
                 }
 
                 mAppointmetsList.add(new Appointment(appointmentId,patientName,appointmentDate,
-                        appointmentDay,appointmentStartTime,appointmentEndTime," "));
+                        appointmentDay,appointmentStartTime,appointmentEndTime,mClinicName));
             }
 
             return true;

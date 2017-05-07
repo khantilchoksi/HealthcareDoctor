@@ -1,6 +1,7 @@
 package com.khantilchoksi.arztdoctor;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -53,6 +54,7 @@ public class HomeActivity extends AppCompatActivity {
 
         mClinicFab = (FloatingActionButton) findViewById(R.id.add_clinic_fab);
         mClinicFab.setVisibility(View.INVISIBLE);
+        mClinicFab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         mClinicFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

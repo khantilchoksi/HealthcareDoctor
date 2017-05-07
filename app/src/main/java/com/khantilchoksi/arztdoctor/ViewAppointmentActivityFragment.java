@@ -687,7 +687,7 @@ public class ViewAppointmentActivityFragment extends Fragment implements GetDoct
                                                   ProgressDialog progressDialog) {
         mPatientNameEditText.setText(patientName);
         mPatientGenderEditText.setText(patientSex);
-        mPatientAgeEditText.setText(patinetAge);
+        mPatientAgeEditText.setText(patinetAge.concat(" years"));
         mPatientBloodGroupEditText.setText(patientBloodGroup);
         mPatientMobileNumberEditText.setText(patientMobileNumber);
 

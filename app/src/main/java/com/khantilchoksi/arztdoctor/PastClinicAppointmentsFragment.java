@@ -34,6 +34,7 @@ public class PastClinicAppointmentsFragment extends Fragment implements GetPastA
 
     private ProgressDialog progressDialog;
     private String mClinicId;
+    private String mClinicName;
 
 
     // TODO: Rename and change types and number of parameters
@@ -62,6 +63,7 @@ public class PastClinicAppointmentsFragment extends Fragment implements GetPastA
         mRootview =  inflater.inflate(R.layout.fragment_past_clinic_appointments, container, false);
 
         mClinicId = getActivity().getIntent().getStringExtra("clinicId");
+        mClinicName = getActivity().getIntent().getStringExtra("clinicName");
 
         mNoAppointmentsLinearLayout = (LinearLayout) mRootview.findViewById(R.id.no_appointments_available_layout);
 
@@ -86,7 +88,7 @@ public class PastClinicAppointmentsFragment extends Fragment implements GetPastA
         progressDialog.show();
 
         GetPastAppointmentsOfDoctorClinicTask getPastAppointmentsOfDoctorClinicTask =
-                new GetPastAppointmentsOfDoctorClinicTask(mClinicId,
+                new GetPastAppointmentsOfDoctorClinicTask(mClinicId, mClinicName,
                         getContext(),
                         getActivity(),this,progressDialog);
         getPastAppointmentsOfDoctorClinicTask.execute((Void) null);

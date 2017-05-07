@@ -35,6 +35,7 @@ public class UpcomingClinicAppointmentsFragment extends Fragment implements  Get
 
     private ProgressDialog progressDialog;
     private String mClinicId;
+    String mClinicName;
 
 
     public UpcomingClinicAppointmentsFragment() {
@@ -75,6 +76,7 @@ public class UpcomingClinicAppointmentsFragment extends Fragment implements  Get
         mRootview = inflater.inflate(R.layout.fragment_upcoming_clinic_appointments, container, false);
 
         mClinicId = getActivity().getIntent().getStringExtra("clinicId");
+        mClinicName = getActivity().getIntent().getStringExtra("clinicName");
 
         mNoAppointmentsLinearLayout = (LinearLayout) mRootview.findViewById(R.id.no_appointments_available_layout);
 
@@ -99,7 +101,7 @@ public class UpcomingClinicAppointmentsFragment extends Fragment implements  Get
         progressDialog.show();
 
         GetAppointmentsOfDoctorClinicTask getAppointmentsOfDoctorClinicTask =
-                new GetAppointmentsOfDoctorClinicTask(mClinicId,
+                new GetAppointmentsOfDoctorClinicTask(mClinicId, mClinicName,
                 getContext(),
                 getActivity(),this,progressDialog);
         getAppointmentsOfDoctorClinicTask.execute((Void) null);
