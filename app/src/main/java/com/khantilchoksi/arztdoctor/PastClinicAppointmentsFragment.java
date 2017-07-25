@@ -103,8 +103,8 @@ public class PastClinicAppointmentsFragment extends Fragment implements GetPastA
         if(mAppointmentsList.isEmpty()){
             mNoAppointmentsLinearLayout.setVisibility(View.VISIBLE);
         }else{
-            mAppointmentAdapter = new AppointmentsAdapter(this.mAppointmentsList, getActivity());
-            mRecyclerView.setAdapter(mAppointmentAdapter);
+            /*mAppointmentAdapter = new AppointmentsAdapter(this.mAppointmentsList, getActivity());
+            mRecyclerView.setAdapter(mAppointmentAdapter);*/
         }
         progressDialog.dismiss();
     }

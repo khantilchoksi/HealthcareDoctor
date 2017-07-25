@@ -54,7 +54,7 @@
 
     <string name="base_url">https://testarzt.herokuapp.com/api/</string>
 
-    <string name="base_url2">http://192.168.0.103/testarzt/public/api/</string>
+    <string name="base_url2">http://192.168.43.218/testarzt/public/api/</string>
 
     <string name="doc_specialtiybase_url"> https://testarzt.herokuapp.com/assets/images/specimg/</string>
     <string name="login_pref">MyLoginPref</string>

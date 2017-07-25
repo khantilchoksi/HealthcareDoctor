@@ -2,6 +2,8 @@ package com.khantilchoksi.arztdoctor;
 
 
 import android.app.ProgressDialog;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.khantilchoksi.arztdoctor.ArztAsyncCalls.GetAppointmentsTask;
+import com.khantilchoksi.arztdoctor.data.AppointmentsContract;
+import com.khantilchoksi.arztdoctor.data.AppointmentsDBHelper;
 
 import java.util.ArrayList;
 
@@ -40,11 +44,14 @@ public class AppointmentsFragment extends Fragment implements GetAppointmentsTas
 
     private ProgressDialog progressDialog;
 
-    @Override
+    private SQLiteDatabase mDb;
+    private Cursor mCursor;
+
+    /*@Override
     public void onStart() {
         super.onStart();
         initDataset();
-    }
+    }*/
 
     public AppointmentsFragment() {
         // Required empty public constructor
@@ -75,6 +82,11 @@ public class AppointmentsFragment extends Fragment implements GetAppointmentsTas
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        AppointmentsDBHelper dbHelper = new AppointmentsDBHelper(getContext());
+        mDb = dbHelper.getWritableDatabase();
+
+        initDataset();
     }
 
     @Override
@@ -100,21 +112,34 @@ public class AppointmentsFragment extends Fragment implements GetAppointmentsTas
         progressDialog.show();
 
         GetAppointmentsTask getAppointmentsTask = new GetAppointmentsTask(getContext(),
-                getActivity(),this,progressDialog);
+                getActivity(),this,progressDialog, mDb);
         getAppointmentsTask.execute((Void) null);
     }
 
     @Override
     public void processFinish(ArrayList<Appointment> appointmentsList, ProgressDialog progressDialog) {
-        this.mAppointmentsList = appointmentsList;
+        //this.mAppointmentsList = appointmentsList;
 
+        this.mCursor = getAllAppointments();
 
-        if(mAppointmentsList.isEmpty()){
+        if(!mCursor.moveToFirst()){
             mNoAppointmentsLinearLayout.setVisibility(View.VISIBLE);
         }else{
-            mAppointmentAdapter = new AppointmentsAdapter(this.mAppointmentsList, getActivity());
+            mAppointmentAdapter = new AppointmentsAdapter(this.mCursor, getActivity());
             mRecyclerView.setAdapter(mAppointmentAdapter);
         }
         progressDialog.dismiss();
+    }
+
+    public Cursor getAllAppointments(){
+        return mDb.query(
+                AppointmentsContract.AppointmentsEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
     }
 }

@@ -2,6 +2,7 @@ package com.khantilchoksi.arztdoctor;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.khantilchoksi.arztdoctor.data.AppointmentsContract;
 
 /**
  * Created by Khantil on 24-03-2017.
@@ -21,7 +22,7 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
 
     private final String LOG_TAG = getClass().getSimpleName();
 
-    private ArrayList<Appointment> mAppointmentsList;
+    private Cursor mCursor;
     private Activity mActivity;
     //private boolean mIsCancelledButtonShown;
 
@@ -73,8 +74,11 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
                 @Override
                 public void onClick(View view) {
                     Intent viewIntent = new Intent(mActivity,ViewAppointmentActivity.class);
+                    if(!mCursor.moveToPosition(getAdapterPosition()))
+                        return;
+
                     viewIntent.putExtra("appointmentId",
-                            mAppointmentsList.get(getAdapterPosition()).getAppointmentId());
+                            mCursor.getColumnIndex(AppointmentsContract.AppointmentsEntry.COLUMN_APPOINTMENT_ID));
                     mActivity.startActivity(viewIntent);
                 }
             });
@@ -118,8 +122,8 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
         }
     }
 
-    public AppointmentsAdapter(ArrayList<Appointment> appointmentsList, Activity activity) {
-        this.mAppointmentsList = appointmentsList;
+    public AppointmentsAdapter(Cursor cursor, Activity activity) {
+        this.mCursor = cursor;
         //this.mIsCancelledButtonShown= isCancelledButtonShown;
         this.mActivity = activity;
     }
@@ -142,18 +146,29 @@ public class AppointmentsAdapter extends RecyclerView.Adapter<AppointmentsAdapte
             //remove cancel button
             holder.getCancelAppointmentButton().setVisibility(View.INVISIBLE);
         }*/
-        holder.getPatientNameTextView().setText(mAppointmentsList.get(position).getPatientName());
+
+        if(!mCursor.moveToPosition(position))
+            return;
+
+        holder.getPatientNameTextView().setText(mCursor.getString(mCursor.getColumnIndex(AppointmentsContract.AppointmentsEntry.COLUMN_PATIENT_NAME)));
+        holder.getAppointmentDateTextView().setText(mCursor.getString(mCursor.getColumnIndex(AppointmentsContract.AppointmentsEntry.COLUMN_APPOINTMENT_DATE)));
+        holder.getAppointmentDayTextView().setText(mCursor.getString(mCursor.getColumnIndex(AppointmentsContract.AppointmentsEntry.COLUMN_APPOINTMENT_DAY)));
+        holder.getAppointmentStartTimeTextView().setText(mCursor.getString(mCursor.getColumnIndex(AppointmentsContract.AppointmentsEntry.COLUMN_APPOINTMENT_START_TIME)));
+        holder.getAppointmentEndTimeTextView().setText(mCursor.getString(mCursor.getColumnIndex(AppointmentsContract.AppointmentsEntry.COLUMN_APPOINTMENT_END_TIME)));
+        holder.getClinicNameTextView().setText(mCursor.getString(mCursor.getColumnIndex(AppointmentsContract.AppointmentsEntry.COLUMN_CLINIC_NAME)));
+
+/*        holder.getPatientNameTextView().setText(mAppointmentsList.get(position).getPatientName());
         holder.getAppointmentDateTextView().setText(mAppointmentsList.get(position).getAppointmentDate());
         holder.getAppointmentDayTextView().setText(mAppointmentsList.get(position).getAppointmentDay());
         holder.getAppointmentStartTimeTextView().setText(mAppointmentsList.get(position).getAppointmentStartTime());
         holder.getAppointmentEndTimeTextView().setText(mAppointmentsList.get(position).getAppointmentEndTime());
-        holder.getClinicNameTextView().setText(mAppointmentsList.get(position).getClinicName());
+        holder.getClinicNameTextView().setText(mAppointmentsList.get(position).getClinicName());*/
 
     }
 
     @Override
     public int getItemCount() {
-        return mAppointmentsList.size();
+        return mCursor.getCount();
     }
 
 

@@ -2,7 +2,10 @@ package com.khantilchoksi.arztdoctor.ArztAsyncCalls;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -11,6 +14,7 @@ import android.widget.Toast;
 import com.khantilchoksi.arztdoctor.Appointment;
 import com.khantilchoksi.arztdoctor.R;
 import com.khantilchoksi.arztdoctor.Utility;
+import com.khantilchoksi.arztdoctor.data.AppointmentsContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -48,6 +53,7 @@ public class GetAppointmentsTask extends AsyncTask<Void, Void, Boolean> {
     ArrayList<Appointment> mAppointmetsList;
 
     ProgressDialog progressDialog;
+    SQLiteDatabase mDb;
 
     public interface AsyncResponse {
         void processFinish(ArrayList<Appointment> appointmentsList, ProgressDialog progressDialog);
@@ -55,11 +61,13 @@ public class GetAppointmentsTask extends AsyncTask<Void, Void, Boolean> {
 
     public AsyncResponse delegate = null;
 
-    public GetAppointmentsTask(Context context, Activity activity, AsyncResponse asyncResponse, ProgressDialog progressDialog){
+    public GetAppointmentsTask(Context context, Activity activity, AsyncResponse asyncResponse,
+                               ProgressDialog progressDialog, SQLiteDatabase db){
         this.context = context;
         this.activity = activity;
         this.delegate = asyncResponse;
         this.progressDialog = progressDialog;
+        this.mDb = db;
         mAppointmetsList = new ArrayList<Appointment>();
 
     }
@@ -228,7 +236,8 @@ public class GetAppointmentsTask extends AsyncTask<Void, Void, Boolean> {
         JSONArray appointmentsJsonArray = clientJson.getJSONArray(appointmentListString);
 
         if(appointmentsJsonArray != null) {
-
+            List<ContentValues> list = new ArrayList<ContentValues>();
+            ContentValues appointmentValues = new ContentValues();
             for (int i = 0; i < appointmentsJsonArray.length(); i++) {
                 JSONObject appointmentJSONObject = appointmentsJsonArray.getJSONObject(i);
 
@@ -256,9 +265,39 @@ public class GetAppointmentsTask extends AsyncTask<Void, Void, Boolean> {
                     e.printStackTrace();
                 }
 
-                mAppointmetsList.add(new Appointment(appointmentId,patientName,appointmentDate,
-                        appointmentDay,appointmentStartTime,appointmentEndTime,clinicName));
+                /*mAppointmetsList.add(new Appointment(appointmentId,patientName,appointmentDate,
+                        appointmentDay,appointmentStartTime,appointmentEndTime,clinicName));*/
+
+                appointmentValues = new ContentValues();
+                appointmentValues.put(AppointmentsContract.AppointmentsEntry.COLUMN_APPOINTMENT_ID, appointmentId);
+                appointmentValues.put(AppointmentsContract.AppointmentsEntry.COLUMN_PATIENT_NAME, patientName);
+                appointmentValues.put(AppointmentsContract.AppointmentsEntry.COLUMN_CLINIC_NAME, clinicName);
+                appointmentValues.put(AppointmentsContract.AppointmentsEntry.COLUMN_APPOINTMENT_DATE, appointmentDate);
+                appointmentValues.put(AppointmentsContract.AppointmentsEntry.COLUMN_APPOINTMENT_DAY, appointmentDay);
+                appointmentValues.put(AppointmentsContract.AppointmentsEntry.COLUMN_APPOINTMENT_START_TIME, appointmentStartTime);
+                appointmentValues.put(AppointmentsContract.AppointmentsEntry.COLUMN_APPOINTMENT_END_TIME, appointmentEndTime);
+
+                list.add(appointmentValues);
+
             }
+
+            try{
+                mDb.beginTransaction();
+                //clear the table first
+                mDb.delete(AppointmentsContract.AppointmentsEntry.TABLE_NAME,null,null);
+
+                //go through the list and add one by one
+                for(ContentValues cv: list){
+                    mDb.insert(AppointmentsContract.AppointmentsEntry.TABLE_NAME,null,cv);
+                }
+
+                mDb.setTransactionSuccessful();
+            }catch (SQLException e){
+
+            }finally {
+                mDb.endTransaction();
+            }
+
 
             return true;
         }
